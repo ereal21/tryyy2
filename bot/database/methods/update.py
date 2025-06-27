@@ -9,11 +9,14 @@ def set_role(telegram_id: str, role: int) -> None:
 
 
 def update_balance(telegram_id: int | str, summ: int) -> None:
-    old_balance = User.balance
-    new_balance = old_balance + summ
-    Database().session.query(User).filter(User.telegram_id == telegram_id).update(
-        values={User.balance: new_balance})
-    Database().session.commit()
+    """Add amount to user's balance."""
+    session = Database().session
+    current = session.query(User.balance).filter(User.telegram_id == telegram_id).scalar() or 0
+    new_balance = current + summ
+    session.query(User).filter(User.telegram_id == telegram_id).update(
+        values={User.balance: new_balance}
+    )
+    session.commit()
 
 
 def update_user_language(telegram_id: int, language: str) -> None:
@@ -23,12 +26,15 @@ def update_user_language(telegram_id: int, language: str) -> None:
 
 
 def buy_item_for_balance(telegram_id: str, summ: int) -> int:
-    old_balance = User.balance
-    new_balance = old_balance - summ
-    Database().session.query(User).filter(User.telegram_id == telegram_id).update(
-        values={User.balance: new_balance})
-    Database().session.commit()
-    return Database().session.query(User.balance).filter(User.telegram_id == telegram_id).one()[0]
+    """Subtract amount from user's balance and return new value."""
+    session = Database().session
+    current = session.query(User.balance).filter(User.telegram_id == telegram_id).scalar() or 0
+    new_balance = current - summ
+    session.query(User).filter(User.telegram_id == telegram_id).update(
+        values={User.balance: new_balance}
+    )
+    session.commit()
+    return new_balance
 
 
 def update_item(item_name: str, new_name: str, new_description: str, new_price: int, new_category_name: str) -> None:

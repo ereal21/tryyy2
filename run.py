@@ -37,14 +37,14 @@ def ensure_requirements() -> None:
 
 
 from threading import Thread
-from bot import start_bot
-from bot.ipn_server import app as ipn_app
 
 
 def run_ipn() -> None:
+    from bot.ipn_server import app as ipn_app
     ipn_app.run(host="0.0.0.0", port=5000)
 
 if __name__ == '__main__':
     ensure_requirements()
+    from bot import start_bot
     Thread(target=run_ipn, daemon=True).start()
     start_bot()
